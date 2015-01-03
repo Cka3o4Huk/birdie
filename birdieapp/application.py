@@ -457,7 +457,8 @@ class Application(Gtk.Application):
             return
 
         index = len(data) - 1
-        self.dm_inbox_list.oldest_id = data[index]['id']
+        if (len(data) > 0):
+            self.dm_inbox_list.oldest_id = data[index]['id']
         cb(data)
 
     def get_dm_cb(self, data):
