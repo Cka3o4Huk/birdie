@@ -17,6 +17,7 @@ import requests
 from requests_oauthlib import OAuth1
 
 import time
+from requests.exceptions import ConnectionError
 
 
 class TwythonStreamer(object):
@@ -127,27 +128,35 @@ class TwythonStreamer(object):
                         _send(retry_counter)
 
                     return response
-
+        
+        def _process_line(line):
+            if not self.connected:
+                return 1
+            if line:
+                try:
+                    if is_py3:
+                        line = line.decode('utf-8')
+                    data = json.loads(line)
+                except ValueError:  # pragma: no cover
+                    self.on_error(response.status_code, 'Unable to decode response, not valid JSON.')
+                else:
+                    if self.on_success(data):  # pragma: no cover
+                        for message_type in self.handlers:
+                            if message_type in data:
+                                handler = getattr(self, 'on_' + message_type, None)
+                                if handler and callable(handler) and not handler(data.get(message_type)):
+                                    return 1
+            return 0
+            
         while self.connected:
             response = _send(retry_counter)
-
-            for line in response.iter_lines(self.chunk_size):
-                if not self.connected:
-                    break
-                if line:
-                    try:
-                        if is_py3:
-                            line = line.decode('utf-8')
-                        data = json.loads(line)
-                    except ValueError:  # pragma: no cover
-                        self.on_error(response.status_code, 'Unable to decode response, not valid JSON.')
-                    else:
-                        if self.on_success(data):  # pragma: no cover
-                            for message_type in self.handlers:
-                                if message_type in data:
-                                    handler = getattr(self, 'on_' + message_type, None)
-                                    if handler and callable(handler) and not handler(data.get(message_type)):
-                                        break
+            
+            try:
+                for line in response.iter_lines(self.chunk_size):
+                    if _process_line(line) > 0:
+                        break
+            except ConnectionError:
+                self.on_error(response.status_code, 'Connectivity issue')
 
         response.close()
 

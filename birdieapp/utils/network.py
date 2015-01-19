@@ -22,6 +22,7 @@ import threading
 import time
 
 import sys
+import traceback
 
 if "--enable-socks5" in sys.argv:
     import socks
@@ -57,6 +58,7 @@ class Network(threading.Thread, SignalObject):
             try:
                 urllib2.urlopen("http://www.twitter.com")
             except urllib2.URLError:
+                traceback.print_exc()
                 self.emit_signal("twitter-down")
             else:
                 self.emit_signal("twitter-up")
