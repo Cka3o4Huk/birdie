@@ -19,6 +19,13 @@ from requests_oauthlib import OAuth1
 import time
 from requests.exceptions import ConnectionError
 
+import traceback
+import sys
+
+stream_verbose = False
+
+if "--verbose" in sys.argv:
+    stream_verbose = True
 
 class TwythonStreamer(object):
     def __init__(self, app_key, app_secret, oauth_token, oauth_token_secret,
@@ -156,6 +163,8 @@ class TwythonStreamer(object):
                     if _process_line(line) > 0:
                         break
             except ConnectionError:
+                if stream_verbose:
+                    traceback.print_exc()
                 self.on_error(response.status_code, 'Connectivity issue')
 
         response.close()
