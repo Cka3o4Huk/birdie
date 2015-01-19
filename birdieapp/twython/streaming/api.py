@@ -156,9 +156,8 @@ class TwythonStreamer(object):
             return 0
             
         while self.connected:
-            response = _send(retry_counter)
-            
             try:
+                response = _send(retry_counter)
                 for line in response.iter_lines(self.chunk_size):
                     if _process_line(line) > 0:
                         break
