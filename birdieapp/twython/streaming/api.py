@@ -29,7 +29,7 @@ if "--verbose" in sys.argv:
 
 class TwythonStreamer(object):
     def __init__(self, app_key, app_secret, oauth_token, oauth_token_secret,
-                 timeout=300, retry_count=None, retry_in=10, client_args=None,
+                 timeout=15, retry_count=None, retry_in=10, client_args=None,
                  handlers=None, chunk_size=1):
         """Streaming class for a friendly streaming user experience
         Authentication IS required to use the Twitter Streaming API

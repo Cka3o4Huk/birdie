@@ -60,7 +60,7 @@ class Network(threading.Thread, SignalObject):
     def run(self):
         while True:
             try:
-                requests.get("http://www.twitter.com")
+                requests.get("http://www.twitter.com", timeout=1)
             except requests.RequestException:
                 if verbose:
                     traceback.print_exc()
