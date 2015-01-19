@@ -17,7 +17,7 @@
 
 
 from birdieapp.signalobject import SignalObject
-import urllib2
+import requests
 import threading
 import time
 
@@ -28,6 +28,10 @@ if "--enable-socks5" in sys.argv:
     import socks
     import socket
     import argparse
+
+verbose = False
+if "--verbose" in sys.argv:
+    verbose = True
 
 class Network(threading.Thread, SignalObject):
 
@@ -56,9 +60,10 @@ class Network(threading.Thread, SignalObject):
     def run(self):
         while True:
             try:
-                urllib2.urlopen("http://www.twitter.com")
-            except urllib2.URLError:
-                traceback.print_exc()
+                requests.get("http://www.twitter.com")
+            except requests.RequestException:
+                if verbose:
+                    traceback.print_exc()
                 self.emit_signal("twitter-down")
             else:
                 self.emit_signal("twitter-up")
