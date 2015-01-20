@@ -21,6 +21,7 @@ from requests.exceptions import ConnectionError
 
 import traceback
 import sys
+from requests.adapters import HTTPAdapter
 
 stream_verbose = False
 
@@ -29,7 +30,7 @@ if "--verbose" in sys.argv:
 
 class TwythonStreamer(object):
     def __init__(self, app_key, app_secret, oauth_token, oauth_token_secret,
-                 timeout=15, retry_count=None, retry_in=10, client_args=None,
+                 timeout=60, retry_count=None, retry_in=10, client_args=None,
                  handlers=None, chunk_size=1):
         """Streaming class for a friendly streaming user experience
         Authentication IS required to use the Twitter Streaming API
@@ -103,7 +104,9 @@ class TwythonStreamer(object):
         """Internal stream request handling"""
         self.connected = True
         retry_counter = 0
-
+        
+        self.client.mount(url, HTTPAdapter(max_retries=1))
+        
         method = method.lower()
         func = getattr(self.client, method)
         params, _ = _transparent_params(params)

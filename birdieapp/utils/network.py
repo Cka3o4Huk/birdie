@@ -18,6 +18,7 @@
 
 from birdieapp.signalobject import SignalObject
 import requests
+from requests.adapters import HTTPAdapter
 import threading
 import time
 
@@ -58,9 +59,12 @@ class Network(threading.Thread, SignalObject):
         self.daemon = True
 
     def run(self):
+        s = requests.Session()
+        s.mount('http://www.twitter.com', HTTPAdapter(max_retries=1))
+        s.mount('https://www.twitter.com', HTTPAdapter(max_retries=1))
         while True:
             try:
-                requests.get("http://www.twitter.com", timeout=1)
+                requests.get("http://www.twitter.com", timeout=20)
             except requests.RequestException:
                 if verbose:
                     traceback.print_exc()
