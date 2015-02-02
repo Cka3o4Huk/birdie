@@ -173,6 +173,18 @@ class Application(Gtk.Application):
             # load accounts info
             self.accounts = load_pickle(BIRDIE_LOCAL_SHARE_PATH +
                                         "accounts.obj")
+            
+            #dedup account list
+            tmp = dict();
+            
+            for ac in self.accounts:
+                tmp[ac.token] = ac
+            
+            self.accounts = list()
+            
+            for ac in tmp.values():
+                self.accounts.append(ac)
+            
             self.window.add_account_menu(
                 self.accounts, self.set_active_account)
 
